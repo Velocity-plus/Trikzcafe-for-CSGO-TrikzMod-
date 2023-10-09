@@ -537,48 +537,15 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result)
 	}
 	if((0 < ent1 <= MaxClients) && (0 < ent2 <= MaxClients))
 	{
-			//make no collide with all players.
-		if(GetEntProp(ent2, Prop_Data, "m_CollisionGroup") == 2)
-			return Plugin_Handled
-		if(GetEntProp(ent1, Prop_Data, "m_CollisionGroup") == 2)
-			return Plugin_Handled
 		//make collide for mate.
 		//make able for nomate to collide with nomate.
-			//make nade collide for all nomates.
-		iPartnerEnt1 = Trikz_FindPartner(ent1)
-		iPartnerEnt2 = Trikz_FindPartner(ent2)
-		
-		bool player_has_partner = (iPartnerEnt1 != -1);
-		bool other_has_partner = (iPartnerEnt2 != -1);
-		
-		if (player_has_partner && other_has_partner)
-		{
-			if (ent1 == iPartnerEnt2)
-			{
-				return Plugin_Continue;
-			}
-			else
-			{
-				return Plugin_Handled;
-			}
-		}
-		// If the player has a partner but the entity hit does not, disallow the hit.
-		else if (player_has_partner)
-		{
-			return Plugin_Handled;
-		}
-		// If the entity hit has a partner but the player does not, disallow the hit.
-		else if (other_has_partner)
-		{
-			return Plugin_Handled;
-		}
-		// If neither the player nor the entity hit have partners, allow the hit.
-		else
-		{
-			return Plugin_Continue;
-		}
-		
-		
+
+		if(iPartnerEnt2 != ent1 && iPartnerEnt1 != ent2 || iPartnerEnt1 == -1 && iPartnerEnt2 == -1)
+			return Plugin_Handled
+			
+		//make no collide with all players.
+		if(GetEntProp(ent2, Prop_Data, "m_CollisionGroup") == 2)
+			return Plugin_Handled
 	}
 	return Plugin_Continue
 }

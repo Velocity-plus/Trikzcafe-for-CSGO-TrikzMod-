@@ -291,7 +291,7 @@ public void OnPluginStart()
 
 	// commands
 	RegAdminCmd("sm_deletereplay", Command_DeleteReplay, ADMFLAG_RCON, "Open replay deletion menu.");
-	RegConsoleCmd("sm_replay", Command_Replay, "Opens the central bot menu. For admins: 'sm_replay stop' to stop the playback.");
+	//RegConsoleCmd("sm_replay", Command_Replay, "Opens the central bot menu. For admins: 'sm_replay stop' to stop the playback.");
 	RegAdminCmd("sm_loadreplay", Command_LoadReplay, ADMFLAG_RCON);
 	// database
 	GetTimerSQLPrefix(gS_MySQLPrefix, 32);

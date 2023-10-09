@@ -93,7 +93,6 @@ bool g_bLateLoad;
 int g_iLaserIndex;
 int g_color1[] = {0, 100, 255, 255};
 int g_color2[] = {0, 255, 0, 255};
-int g_ClientBox[4096];
 
 void DebugMsg(int client, const char[] fmt, any ...)
 {
@@ -144,7 +143,7 @@ public void OnPluginStart()
 			g_vecMaxsDucked[2]   = 45.0;
 		}
 	}
-	HookEvent("player_spawn", Event_Spawn, EventHookMode_Post);
+
 	g_flDuckDelta = (g_vecMaxsUnducked[2]-g_vecMaxsDucked[2]) / 2;
 
 	g_cvDownhill 	= CreateConVar("rngfix_downhill", "1", "Enable downhill incline fix.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
@@ -266,62 +265,6 @@ public void OnPluginStart()
 	}
 }
 
-void Event_Spawn(Event event, const char[] name, bool dontBroadcast) 
-{
-    int client = GetClientOfUserId(event.GetInt("userid"));
-    CreateTimer(0.15, SpawnTimer, client);
-}
-
-stock int Entity_GetParent(int entity)
-{
-    return GetEntPropEnt(entity, Prop_Data, "m_pParent");
-}
-
-stock int Entity_GetParentName(int entity, char[] buffer, int size)
-{
-    return GetEntPropString(entity, Prop_Data, "m_iParent", buffer, size);
-}
-
-public Action SpawnTimer(Handle timer, int client)
-{
-    if (CIsValidClient(client))
-    {
-        if (IsPlayerAlive(client))
-        {
-            // SMLIB-ish
-            int maxEntities = GetMaxEntities();
-            for (int entity=0; entity < maxEntities; entity++) {
-
-                if (!IsValidEntity(entity)) {
-                    continue;
-                }
-
-                if (entity > 0 && entity <= MaxClients && !IsClientConnected(entity)) {
-                    continue;
-                }
-
-                if (Entity_GetParent(entity) == client) {
-                    char strName[50];
-                    if(GetEntityClassname(entity, strName, sizeof(strName))) 
-                        if(StrEqual(strName, "prop_dynamic"))
-                        {
-                            char ename[50];
-                            GetEntPropString(entity, Prop_Data, "m_iName", ename, sizeof(ename));
-                            if(StrEqual(ename,"HUNDER",true))
-                                g_ClientBox[entity] = client;
-							
-
-                            if(StrEqual(ename,"HOVER",true))
-                                g_ClientBox[entity] = client;
-
-                        }
-                }
-            }
-        }
-    }
-    return Plugin_Handled;
-}
-
 public void OnMapStart()
 {
 	g_iLaserIndex = PrecacheModel("materials/sprites/laserbeam.vmt", true);
@@ -415,15 +358,6 @@ public void Hook_TriggerTeleportTouchPost(int entity, int other)
 	DebugMsg(other, "Triggered teleport %i", entity);
 }
 
-stock bool CIsValidClient(int client, bool nobots = true)
-{
-    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || (nobots && IsFakeClient(client)))
-    {
-        return false;
-    }
-    return IsClientInGame(client);
-}
-
 public Action Hook_TriggerEndTouch(int entity, int other)
 {
 	if (1 <= other <= MaxClients)
@@ -436,12 +370,6 @@ public Action Hook_TriggerEndTouch(int entity, int other)
 
 public bool PlayerFilter(int entity, int mask)
 {
-	
-	if (g_ClientBox[entity] >= 0){
-		return false;
-	}
-	
-	
 	return !(1 <= entity <= MaxClients);
 }
 

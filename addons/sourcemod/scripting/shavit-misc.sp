@@ -31,7 +31,6 @@
 #undef REQUIRE_PLUGIN
 #include <shavit>
 #include <trikz>
-#include <shavit/chat>
 
 #pragma newdecls required
 #pragma semicolon 1
@@ -81,7 +80,6 @@ chatstrings_t gS_ChatStrings;
 // Avoid solobonus exploits
 bool g_groundBoost[MAXPLAYERS + 1];
 bool g_bouncedOff[2048];
-bool gB_Chat = false;
 
 public Plugin myinfo =
 {
@@ -172,7 +170,6 @@ public void OnPluginStart()
 	// modules
 	gB_Rankings = LibraryExists("shavit-rankings");
 	gB_Replay = LibraryExists("shavit-replay");
-    gB_Chat = LibraryExists("shavit-chat");
 }
 
 public void OnClientCookiesCached(int client)
@@ -239,10 +236,6 @@ public void OnLibraryAdded(const char[] name)
 	{
 		gB_Replay = true;
 	}
-	else if(StrEqual(name, "shavit-chat"))
-	{
-		gB_Chat = true;
-	}
 }
 
 public void OnLibraryRemoved(const char[] name)
@@ -255,10 +248,6 @@ public void OnLibraryRemoved(const char[] name)
 	else if(StrEqual(name, "shavit-replay"))
 	{
 		gB_Replay = false;
-	}
-	else if(StrEqual(name, "shavit-chat"))
-	{
-		gB_Chat = false;
 	}
 }
 /*
@@ -395,13 +384,6 @@ void UpdateClanTag(int client)
 	ReplaceString(sCustomTag, 32, "{time}", sTime);
 	ReplaceString(sCustomTag, 32, "{tr}", sTrack);
 	ReplaceString(sCustomTag, 32, "{rank}", sRank);
-
-	if(gB_Chat)
-	{
-		char sChatrank[32];
-		Shavit_GetPlainChatrank(client, sChatrank, sizeof(sChatrank), false);
-		ReplaceString(sCustomTag, 32, "{cr}", sChatrank);
-	}
 
 	Action result = Plugin_Continue;
 	Call_StartForward(gH_Forwards_OnClanTagChangePre);

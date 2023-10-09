@@ -5,54 +5,6 @@
 
 #include <outputinfo>
 
-stock int FindOutput(int entity, const char[] output, int startindex, const char[] target = NULL_STRING, const char[] targetinput = NULL_STRING, const char[] parameter = NULL_STRING, float delay = -1.0, int timestofire = 0)
-{
-	char buffer[256];
-	int count = GetOutputActionCount(entity, output);
-	for (int i = startindex; i < count; i++) {
-		if (target[0] != '\0') {
-			if (!GetOutputActionTarget(entity, output, i, buffer, sizeof(buffer))) {
-				continue;
-			}
-			if (strncmp(buffer, target, sizeof(buffer)) != 0) {
-				continue;
-			}
-		}
-		if (targetinput[0] != '\0') {
-			if (!GetOutputActionTargetInput(entity, output, i, buffer, sizeof(buffer))) {
-				continue;
-			}
-			if (strncmp(buffer, targetinput, sizeof(buffer)) != 0) {
-				continue;
-			}
-		}
-		if (parameter[0] != '\0') {
-			if (!GetOutputActionParameter(entity, output, i, buffer, sizeof(buffer))) {
-				continue;
-			}
-			if (strncmp(buffer, targetinput, sizeof(buffer)) != 0) {
-				continue;
-			}
-		}
-		if (delay != -1.0) {
-			float actiondelay = GetOutputActionDelay(entity, output, i);
-			if (actiondelay == -1.0) {
-				continue;
-			}
-			if (actiondelay != delay) {
-				continue;
-			}
-		}
-		if (timestofire != 0) {
-			if (timestofire != GetOutputActionTimesToFire(entity, output, i)) {
-				continue;
-			}
-		}
-		return i;
-	}
-	return -1;
-}
-
 stock int GetOutputCount(int entity, const char[] output) {
 	return GetOutputActionCount(entity, output);
 }
@@ -101,6 +53,74 @@ stock int GetOutputFormatted(int entity, const char[] output, int index, char[] 
 	return FormatEx(formatted, maxlen, "%s,%s,%s,%f,%d", target, targetinput, parameter, delay, timestofire);
 }
 
+stock int GetOutputValue(int entity, const char[] output)
+{
+	return GetOutputActionValue(entity, output);
+}
+
+stock float GetOutputValueFloat(int entity, const char[] output)
+{
+	return GetOutputActionValueFloat(entity, output);
+}
+
+stock int GetOutputValueString(int entity, const char[] output, char[] value, int maxlen)
+{
+	return GetOutputActionValueString(entity, output, value, maxlen);
+}
+
+stock bool GetOutputValueVector(int entity, const char[] output, float vec[3])
+{
+	return GetOutputActionValueVector(entity, output, vec[3]);
+}
+
+stock int FindOutput(int entity, const char[] output, int startindex, const char[] target = NULL_STRING, const char[] targetinput = NULL_STRING, const char[] parameter = NULL_STRING, float delay = -1.0, int timestofire = 0)
+{
+	char buffer[256];
+	int count = GetOutputActionCount(entity, output);
+	for (int i = startindex; i < count; i++) {
+		if (target[0] != '\0') {
+			if (!GetOutputActionTarget(entity, output, i, buffer, sizeof(buffer))) {
+				continue;
+			}
+			if (strncmp(buffer, target, sizeof(buffer)) != 0) {
+				continue;
+			}
+		}
+		if (targetinput[0] != '\0') {
+			if (!GetOutputActionTargetInput(entity, output, i, buffer, sizeof(buffer))) {
+				continue;
+			}
+			if (strncmp(buffer, targetinput, sizeof(buffer)) != 0) {
+				continue;
+			}
+		}
+		if (parameter[0] != '\0') {
+			if (!GetOutputActionParameter(entity, output, i, buffer, sizeof(buffer))) {
+				continue;
+			}
+			if (strncmp(buffer, targetinput, sizeof(buffer)) != 0) {
+				continue;
+			}
+		}
+		if (delay != -1.0) {
+			float actiondelay = GetOutputActionDelay(entity, output, i);
+			if (actiondelay == -1.0) {
+				continue;
+			}
+			if (actiondelay != delay) {
+				continue;
+			}
+		}
+		if (timestofire != 0) {
+			if (timestofire != GetOutputActionTimesToFire(entity, output, i)) {
+				continue;
+			}
+		}
+		return i;
+	}
+	return -1;
+}
+
 stock bool DeleteOutput(int entity, const char[] output, int index) {
 	return RemoveOutputAction(entity, output, index);
 }
@@ -112,4 +132,9 @@ stock int DeleteAllOutputs(int entity, const char[] output)
 		DeleteOutput(entity, output, i);
 	}
 	return count;
+}
+
+stock int GetOutputNames(int Entity, int Index, char[] sOutput, int MaxLen)
+{
+	return GetOutputActionNames(Entity, Index, sOutput, MaxLen);
 }

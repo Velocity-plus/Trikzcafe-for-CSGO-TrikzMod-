@@ -20,6 +20,7 @@
 
 #define ASSERT(%1)%2;
 #define ASSERT_MSG(%1,%2)%3;
+#define ASSERT_FMT(%1,%2)%3;
 #define ASSERT_FINAL(%1)%2;
 #define ASSERT_FINAL_MSG(%1,%2)%3;
 
@@ -27,6 +28,7 @@
 
 #define ASSERT(%1) if(!(%1)) ASSERTUTILS_FAILSTATE_FUNC(__SNAME..."Assertion failed: \""...#%1..."\"")
 #define ASSERT_MSG(%1,%2) if(!(%1)) ASSERTUTILS_FAILSTATE_FUNC(__SNAME...%2)
+#define ASSERT_FMT(%1,%2) if(!(%1)) ASSERTUTILS_FAILSTATE_FUNC(__SNAME...%2)
 #define ASSERT_FINAL(%1) if(!(%1)) SetFailState(__SNAME..."Assertion failed: \""...#%1..."\"")
 #define ASSERT_FINAL_MSG(%1,%2) if(!(%1)) SetFailState(__SNAME...%2)
 
@@ -34,6 +36,7 @@
 
 #define ASSERT(%1) if(!(%1)) SetFailState(__SNAME..."Assertion failed: \""...#%1..."\"")
 #define ASSERT_MSG(%1,%2) if(!(%1)) SetFailState(__SNAME...%2)
+#define ASSERT_FMT(%1,%2) if(!(%1)) SetFailState(__SNAME...%2)
 #define ASSERT_FINAL(%1) ASSERT(%1)
 #define ASSERT_FINAL_MSG(%1,%2) ASSERT_MSG(%1,%2)
 

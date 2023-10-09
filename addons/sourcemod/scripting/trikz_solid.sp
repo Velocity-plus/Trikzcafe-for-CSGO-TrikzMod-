@@ -41,7 +41,6 @@ int g_iAllowedToggles[MAX_SOLIDS][MAXPLAYERS + 1];
 int g_iOldToggles[MAX_SOLIDS][MAXPLAYERS + 1];
 int g_iToggleAmount[MAX_SOLIDS][12];
 int g_iLinkedSolids[2049][12];
-int g_ClientBox[4096];
 
 int g_CurrentSolid = 0;
 
@@ -66,14 +65,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     
     CreateNative("Trikz_IsToggleableEnabledForPlayer", Native_IsToggleableEnabledForPlayer);
     CreateNative("Trikz_IsEntityToggleable", Native_IsEntityToggleable);
-    return APLRes_Success;
 }
 
 public void OnPluginStart()
 {
     HookEvent("round_start", Event_RoundStart, EventHookMode_Post);
-    HookEvent("player_spawn",   Event_Spawn,    EventHookMode_Post);
-
+    
     g_hCheckSolidity = CreateGlobalForward("Trikz_CheckSolidity", ET_Hook, Param_Cell, Param_Cell)
         
     Handle hGameData = LoadGameConfigFile("sdktools.games");
@@ -184,65 +181,66 @@ public void OnClientPutInServer(int client)
 //public OnTimerStart_Post(int client, int Type, int Style)
 public Shavit_OnEnterZonePartnerMode(int client, int type, int track, int id, int entity, int data)
 {
-    if(type == Zone_Start && track != Track_Solobonus)
-    {
-        int partner = Trikz_FindPartner(client);
-        
-        if(partner != -1)
-        {
-            for(int i = 0; i < g_CurrentSolid; i++)
-            {
-                g_bStartTouch[i][client] = false;
-                g_bStartTouch[i][partner] = false;
-                g_bPlayerSolid[i][client] = g_bDefaultState[i];
-                g_bPlayerSolid[i][partner] = g_bDefaultState[i];
-                g_iAllowedToggles[i][client] = 0;
-                g_iAllowedToggles[i][partner] = 0;
-                g_iOldToggles[i][partner] = g_iAllowedToggles[i][partner];
+	if(type == Zone_Start && track != Track_Solobonus)
+	{
+		int partner = Trikz_FindPartner(client);
+		
+		if(partner != -1)
+		{
+			for(int i = 0; i < g_CurrentSolid; i++)
+			{
+				g_bStartTouch[i][client] = false;
+				g_bStartTouch[i][partner] = false;
+				g_bPlayerSolid[i][client] = g_bDefaultState[i];
+				g_bPlayerSolid[i][partner] = g_bDefaultState[i];
+				g_iAllowedToggles[i][client] = 0;
+				g_iAllowedToggles[i][partner] = 0;
+				g_iOldToggles[i][partner] = g_iAllowedToggles[i][partner];
                 g_iOldToggles[i][client] = g_iAllowedToggles[i][client];
-            }
-            
-            for(int i = 0; i <= 2048; i++)
-            {
-                g_bButtonLocked[i][client] = g_bButtonLockedDefault[i];
-                g_bButtonLocked[i][partner] = g_bButtonLockedDefault[i];
-                g_fButtonNextPress[i][client] = 0.0;
-                g_fButtonNextPress[i][partner] = 0.0;
-            }
-            
-            for(int i = 0; i < g_CurrentCounter; i++)
-            {
-                g_fMathCounterValue[i][client] = g_fMathCounterDefaultValue[i];
-                g_fMathCounterValue[i][partner] = g_fMathCounterDefaultValue[i];
-            }
-        }
-    }
+			}
+			
+			for(int i = 0; i <= 2048; i++)
+			{
+				g_bButtonLocked[i][client] = g_bButtonLockedDefault[i];
+				g_bButtonLocked[i][partner] = g_bButtonLockedDefault[i];
+				g_fButtonNextPress[i][client] = 0.0;
+				g_fButtonNextPress[i][partner] = 0.0;
+			}
+			
+			for(int i = 0; i < g_CurrentCounter; i++)
+			{
+				g_fMathCounterValue[i][client] = g_fMathCounterDefaultValue[i];
+				g_fMathCounterValue[i][partner] = g_fMathCounterDefaultValue[i];
+			}
+		}
+	}
 }
 
 public Shavit_OnEnterZone(int client, int type, int track, int id, int entity, int data)
 {
-    if(type == Zone_Start && track == Track_Solobonus)
-    {       
-        
-        for(int i = 0; i < g_CurrentSolid; i++)
-        {
-            g_bStartTouch[i][client] = false;
-            g_bPlayerSolid[i][client] = g_bDefaultState[i];
-            g_iAllowedToggles[i][client] = 0;
-            g_iOldToggles[i][client] = g_iAllowedToggles[i][client];
-        }
-        
-        for(int i = 0; i <= 2048; i++)
-        {
-            g_bButtonLocked[i][client] = g_bButtonLockedDefault[i];
-            g_fButtonNextPress[i][client] = 0.0;
-        }
-        
-        for(int i = 0; i < g_CurrentCounter; i++)
-        {
-            g_fMathCounterValue[i][client] = g_fMathCounterDefaultValue[i];
-        }
-    }
+	if(type == Zone_Start && track == Track_Solobonus)
+	{		
+		//PrintToChatAll("%i", g_CurrentSolid);
+		
+		for(int i = 0; i < g_CurrentSolid; i++)
+		{
+			g_bStartTouch[i][client] = false;
+			g_bPlayerSolid[i][client] = g_bDefaultState[i];
+			g_iAllowedToggles[i][client] = 0;
+			g_iOldToggles[i][client] = g_iAllowedToggles[i][client];
+		}
+		
+		for(int i = 0; i <= 2048; i++)
+		{
+			g_bButtonLocked[i][client] = g_bButtonLockedDefault[i];
+			g_fButtonNextPress[i][client] = 0.0;
+		}
+		
+		for(int i = 0; i < g_CurrentCounter; i++)
+		{
+			g_fMathCounterValue[i][client] = g_fMathCounterDefaultValue[i];
+		}
+	}
 }
 
 // bool CBaseEntity::AcceptInput(char const*, CBaseEntity*, CBaseEntity*, variant_t, int)
@@ -284,10 +282,10 @@ public MRESReturn AcceptInputCounter(int pThis, Handle hReturn, Handle hParams)
         
     int partner = Trikz_FindPartner(activator);
     if(partner == -1)
-    {
+	{
         activator = 0;
         partner = 0;
-    }
+	}
     
     static char sValue[128];
     
@@ -332,6 +330,7 @@ public MRESReturn AcceptInputCounter(int pThis, Handle hReturn, Handle hParams)
         g_fMathCounterValue[iCounterId][activator] = flVal;
         g_fMathCounterValue[iCounterId][partner] = flVal;
         
+        //PrintToServer("FLVALUE %s, %f", sValue, flVal);
         
         if(g_fMathCounterValue[iCounterId][activator] < g_fMathCounterMin[iCounterId])
         {
@@ -375,10 +374,10 @@ public MRESReturn AcceptInputButton(int pThis, Handle hReturn, Handle hParams)
         
     int partner = Trikz_FindPartner(activator);
     if(partner == -1)
-    {
+	{
         activator = 0;
         partner = 0;
-    }
+	}
         
     if(StrEqual(input, "Lock"))
     {
@@ -444,10 +443,10 @@ public MRESReturn AcceptInputToggle(int pThis, Handle hReturn, Handle hParams)
         
     int partner = Trikz_FindPartner(activator);
     if(partner == -1)
-    {
+	{
         activator = 0;
         partner = 0;
-    }
+	}
         
     if(StrEqual(input, "Disable"))
     {
@@ -633,74 +632,11 @@ public Action Hook_SpawnPost(int entity)
     return Plugin_Continue;
 }
 
-stock int Entity_GetParent(int entity)
-{
-    return GetEntPropEnt(entity, Prop_Data, "m_pParent");
-}
-
-stock int Entity_GetParentName(int entity, char[] buffer, int size)
-{
-    return GetEntPropString(entity, Prop_Data, "m_iParent", buffer, size);
-}
-
-void Event_Spawn(Event event, const char[] name, bool dontBroadcast) 
-{
-    int client = GetClientOfUserId(event.GetInt("userid"));
-    CreateTimer(0.15, SpawnTimer, client);
-}
-
-stock bool CIsValidClient(int client, bool nobots = true)
-{
-    if (client <= 0 || client > MaxClients || !IsClientConnected(client) || (nobots && IsFakeClient(client)))
-    {
-        return false;
-    }
-    return IsClientInGame(client);
-}
-
-public Action SpawnTimer(Handle timer, int client)
-{
-    if (CIsValidClient(client))
-    {
-        if (IsPlayerAlive(client))
-        {
-            // SMLIB-ish
-            int maxEntities = GetMaxEntities();
-            for (int entity=0; entity < maxEntities; entity++) {
-
-                if (!IsValidEntity(entity)) {
-                    continue;
-                }
-
-                if (entity > 0 && entity <= MaxClients && !IsClientConnected(entity)) {
-                    continue;
-                }
-
-                if (Entity_GetParent(entity) == client) {
-                    char strName[50];
-                    if(GetEntityClassname(entity, strName, sizeof(strName))) 
-                        if(StrEqual(strName, "prop_dynamic"))
-                        {
-                            char ename[50];
-                            GetEntPropString(entity, Prop_Data, "m_iName", ename, sizeof(ename));
-                            if(StrEqual(ename,"HUNDER",true))
-                                g_ClientBox[entity] = client;
-
-                            if(StrEqual(ename,"HOVER",true))
-                                g_ClientBox[entity] = client;
-
-                        }
-                }
-            }
-        }
-    }
-    return Plugin_Handled;
-}
 public Event_RoundStart(Handle:event, const String:name[], bool:dontBroadcast)
 {
-    if(GameRules_GetProp("m_bWarmupPeriod") == 1)
-        return;
-    
+	if(GameRules_GetProp("m_bWarmupPeriod") == 1)
+		return;
+	
     CreateTimer(1.0,Timer_FindAllValidSolids,_,TIMER_FLAG_NO_MAPCHANGE);
 }
 
@@ -722,8 +658,11 @@ public Action Timer_FindAllValidSolids(Handle timer)
         
         GetEdictClassname(ent, sDebug2, sizeof(sDebug2));
         
-
+        //PrintToServer("PROCESSING: %s | %s", sDebug1, sDebug2);
+        
+        //PrintToServer("OUTPUT OnStartTouch:");
         FindAllSolidsWithOutput(ent, "OnStartTouch");
+        //PrintToServer("OUTPUT OnEndTouch:");
         FindAllSolidsWithOutput(ent, "OnEndTouch");
         
         char classname[64];
@@ -745,9 +684,11 @@ public Action Timer_FindAllValidSolids(Handle timer)
         
         GetEdictClassname(ent, sDebug2, sizeof(sDebug2));
         
-
+        //PrintToServer("PROCESSING: %s | %s", sDebug1, sDebug2);
+            
+        //PrintToServer("OUTPUT OnPressed:");
         g_bClientButton[ent] = FindAllSolidsWithOutput(ent, "OnPressed");
-
+        //PrintToServer("OUTPUT OnDamaged:");
         FindAllSolidsWithOutput(ent, "OnDamaged");
         
         if(!(GetEntProp(ent, Prop_Data, "m_spawnflags") & 1))
@@ -797,46 +738,46 @@ bool FindAllSolidsWithOutput(int entity, const char[] output)
             {
                 entityS = entity;
                 if(StrEqual(output,"OnHitMax"))
-                {
+				{
                     //HookSingleEntityOutput(entity, "OnUser3", OnToggleEntity);
-                    HookEntityOutput("func_brush", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("func_wall_toggle", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("trigger_teleport", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("trigger_teleport_relative", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("trigger_multiple", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("trigger_push", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("func_button", "OnUser3", OnToggleEntity);
-                    HookEntityOutput("math_counter", "OnUser3", OnToggleEntity);
-                }
+					HookEntityOutput("func_brush", "OnUser3", OnToggleEntity);
+					HookEntityOutput("func_wall_toggle", "OnUser3", OnToggleEntity);
+					HookEntityOutput("trigger_teleport", "OnUser3", OnToggleEntity);
+					HookEntityOutput("trigger_teleport_relative", "OnUser3", OnToggleEntity);
+					HookEntityOutput("trigger_multiple", "OnUser3", OnToggleEntity);
+					HookEntityOutput("trigger_push", "OnUser3", OnToggleEntity);
+					HookEntityOutput("func_button", "OnUser3", OnToggleEntity);
+					HookEntityOutput("math_counter", "OnUser3", OnToggleEntity);
+				}
                 else if(StrEqual(output,"OnHitMin"))
-                {
+				{
                     //HookSingleEntityOutput(entity, "OnUser4", OnToggleEntity);
-                    HookEntityOutput("func_brush", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("func_illusionary", "OnUser4", OnToggleEntity)
-                    HookEntityOutput("func_wall_toggle", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("trigger_teleport", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("trigger_teleport_relative", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("trigger_multiple", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("trigger_push", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("func_button", "OnUser4", OnToggleEntity);
-                    HookEntityOutput("math_counter", "OnUser4", OnToggleEntity);
-                }
+					HookEntityOutput("func_brush", "OnUser4", OnToggleEntity);
+					HookEntityOutput("func_illusionary", "OnUser4", OnToggleEntity)
+					HookEntityOutput("func_wall_toggle", "OnUser4", OnToggleEntity);
+					HookEntityOutput("trigger_teleport", "OnUser4", OnToggleEntity);
+					HookEntityOutput("trigger_teleport_relative", "OnUser4", OnToggleEntity);
+					HookEntityOutput("trigger_multiple", "OnUser4", OnToggleEntity);
+					HookEntityOutput("trigger_push", "OnUser4", OnToggleEntity);
+					HookEntityOutput("func_button", "OnUser4", OnToggleEntity);
+					HookEntityOutput("math_counter", "OnUser4", OnToggleEntity);
+				}
                 else
-                {
+				{
                     //HookSingleEntityOutput(entity, output, OnToggleEntity);
-                    HookEntityOutput("func_brush", output, OnToggleEntity);
-                    HookEntityOutput("func_illusionary", output, OnToggleEntity);
-                    HookEntityOutput("func_wall_toggle", output, OnToggleEntity);
-                    HookEntityOutput("trigger_teleport", output, OnToggleEntity);
-                    HookEntityOutput("trigger_teleport_relative", output, OnToggleEntity);
-                    HookEntityOutput("trigger_multiple", output, OnToggleEntity);
-                    HookEntityOutput("trigger_push", output, OnToggleEntity);
-                    HookEntityOutput("func_button", output, OnToggleEntity);
-                }
+					HookEntityOutput("func_brush", output, OnToggleEntity);
+					HookEntityOutput("func_illusionary", output, OnToggleEntity);
+					HookEntityOutput("func_wall_toggle", output, OnToggleEntity);
+					HookEntityOutput("trigger_teleport", output, OnToggleEntity);
+					HookEntityOutput("trigger_teleport_relative", output, OnToggleEntity);
+					HookEntityOutput("trigger_multiple", output, OnToggleEntity);
+					HookEntityOutput("trigger_push", output, OnToggleEntity);
+					HookEntityOutput("func_button", output, OnToggleEntity);
+				}
             }
             
             ProccessToggleEntitiesWithName(target, "func_brush", entityS, output);
-            ProccessToggleEntitiesWithName(target, "func_illusionary", entityS, output);
+			ProccessToggleEntitiesWithName(target, "func_illusionary", entityS, output);
             ProccessToggleEntitiesWithName(target, "func_wall_toggle", entityS, output);
             ProccessToggleEntitiesWithName(target, "trigger_teleport", entityS, output);
             ProccessToggleEntitiesWithName(target, "trigger_teleport_relative", entityS, output);
@@ -875,7 +816,7 @@ public void OnToggleEntity(const char[] output, int caller, int activator, float
         return;
         
     static int iSolidId;
-    
+	
     int rEnt = caller;
                 
     if(caller < 0)
@@ -903,10 +844,10 @@ public void OnToggleEntity(const char[] output, int caller, int activator, float
             int partner = Trikz_FindPartner(person);
             
             if(partner == -1)
-            {
+			{
                 person = 0;
                 partner = 0;
-            }
+			}
             
             g_iAllowedToggles[iSolidId][person] += g_iToggleAmount[iSolidId][GetOutputIDFromName(output)];
             g_iAllowedToggles[iSolidId][partner] = g_iAllowedToggles[iSolidId][person];
@@ -1060,10 +1001,10 @@ public Action OnUse(int entity, int activator, int caller, UseType type, float v
     int partner = Trikz_FindPartner(activator)
     
     if(partner == -1)
-    {
+	{
         player = 0;
         partner = 0;
-    }
+	}
         
     if(g_bButtonLocked[entity][player])
         return Plugin_Handled;
@@ -1091,14 +1032,14 @@ public Action OnUse(int entity, int activator, int caller, UseType type, float v
 
 void ProccessToggleEntitiesWithName(const char[] sTargetname, const char[] sClassname, int parentEnt, const char[] sOutput)
 {
-    //PrintToServer("PASS");
+	//PrintToServer("PASS");
     int iTarget = INVALID_ENT_REFERENCE;
     while((iTarget = FindEntityByTargetname(iTarget, sTargetname, sClassname, parentEnt)) != INVALID_ENT_REFERENCE)
     {
-        //PrintToServer("PASS2");
+		//PrintToServer("PASS2");
         if(!g_bUsedEdict[iTarget])
         {
-            //PrintToServer("PASS3");
+			//PrintToServer("PASS3");
             //if(StrEqual(sClassname,"func_brush") && GetEntProp(iTarget, Prop_Data, "m_iSolidity") != 0) //unsupported
             //    continue;
                 
@@ -1146,11 +1087,11 @@ void ProccessToggleEntitiesWithName(const char[] sTargetname, const char[] sClas
             if(StrContains(sClassname, "trigger_", false) != -1)
                 enabled = (GetEntProp(iTarget, Prop_Data, "m_bDisabled") == 0);
             else
-            {
+			{
                 enabled = !(GetEntProp(iTarget, Prop_Data, "m_usSolidFlags") & 4);
                 if(StrEqual(sClassname, "func_brush") && GetEntProp(iTarget, Prop_Data, "m_usSolidFlags") & 4)
                     enabled = GetEntProp(iTarget, Prop_Data, "m_iDisabled") == 0;
-            }
+			}
     
             if (!enabled)
             {
@@ -1293,7 +1234,7 @@ void ProccessBreakableEntitiesWithName(const char[] sTargetname, const char[] sC
             static char sOutputTargetInput[256];
             static char sOutputParameter[256];
             static char sOutputFormatted[256];
-            
+			
             for(int i = 0; i < count; i++)
             {
                 /*GetOutputFormatted(iTarget, "m_OnBreak", i, sBreakOutput, sizeof(sBreakOutput));
@@ -1616,114 +1557,21 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result )
         
     if((1 <= ent1 <= MaxClients && g_bFlashbang[ent2]) || (1 <= ent2 <= MaxClients && g_bFlashbang[ent1]))
         return Plugin_Continue;
-        
-    Call_StartForward(g_hCheckSolidity);
+		
+	Call_StartForward(g_hCheckSolidity);
     Call_PushCell(ent1);
     Call_PushCell(ent2);
     Call_Finish(result);
     
     int player = ent1;
     int other = ent2;
-
-    int owner = player;
-    int orig = -1;
-    
-    // NEW PROP_DYNAMIC ///
-    if(g_bFlashbang[player] && CIsValidClient(g_ClientBox[other])){
-		
-		owner = GetEntPropEnt(player, Prop_Data, "m_hOwnerEntity");
-		
-		// Check if either the player or the entity hit by the flashbang have a partner.
-		bool player_has_partner = (Trikz_FindPartner(owner) != -1);
-
-		bool other_has_partner = (Trikz_FindPartner(g_ClientBox[other]) != -1);
-
-		// If both the player and the entity hit have partners, check if the player's partner matches the hit entity's owner.
-		if (player_has_partner && other_has_partner)
-		{
-			if (g_ClientBox[other] == Trikz_FindPartner(owner))
-			{
-				result = true;
-				return Plugin_Continue;
-			}
-			else
-			{
-				result = false;
-				return Plugin_Handled;
-			}
-		}
-		// If the player has a partner but the entity hit does not, disallow the hit.
-		else if (player_has_partner)
-		{
-			result = false;
-			return Plugin_Handled;
-		}
-		// If the entity hit has a partner but the player does not, disallow the hit.
-		else if (other_has_partner)
-		{
-			result = false;
-			return Plugin_Handled;
-		}
-		// If neither the player nor the entity hit have partners, allow the hit.
-		else
-		{
-			result = true;
-			return Plugin_Continue;
-		}
-		
-	} else if (g_bFlashbang[other] && CIsValidClient(g_ClientBox[player])) {
-		
-		
-		owner = GetEntPropEnt(other, Prop_Data, "m_hOwnerEntity");
-		
-		// Check if either the player or the entity hit by the flashbang have a partner.
-		bool player_has_partner = (Trikz_FindPartner(owner) != -1);
-		bool other_has_partner = (Trikz_FindPartner(g_ClientBox[player]) != -1);
-
-		// If both the player and the entity hit have partners, check if the player's partner matches the hit entity's owner.
-		if (player_has_partner && other_has_partner)
-		{
-			if (g_ClientBox[player] == Trikz_FindPartner(owner))
-			{
-				result = true;
-				return Plugin_Continue;
-			}
-			else
-			{
-				result = false;
-				return Plugin_Handled;
-			}
-		}
-		// If the player has a partner but the entity hit does not, disallow the hit.
-		else if (player_has_partner)
-		{
-			result = false;
-			return Plugin_Handled;
-		}
-		// If the entity hit has a partner but the player does not, disallow the hit.
-		else if (other_has_partner)
-		{
-			result = false;
-			return Plugin_Handled;
-		}
-		// If neither the player nor the entity hit have partners, allow the hit.
-		else
-		{
-			result = true;
-			return Plugin_Continue;
-		}
-		
-	}
-	
-
-    // -------- ///
     
     if(1 <= ent2 <= MaxClients || (!(1 <= ent2 <= MaxClients) && g_bFlashbang[ent2]))
     {
         player = ent2;
         other = ent1;
     }
-
+    
     if((1 <= player <= MaxClients) && IsFakeClient(player))
         return Plugin_Continue;
     
@@ -1745,36 +1593,25 @@ public Action CH_PassFilter(int ent1, int ent2, bool &result )
     }
     
     if(iSolidId == -1)
-    {
         return Plugin_Continue;
-    }
-    
-    
         
     if(!(0 < player <= 2048))
-    {
-        PrintToChatAll("done1");
         return Plugin_Continue;
-    }
-
-    owner = player;
+        
+    int owner = player
     
     if(g_bFlashbang[player])
         owner = GetEntPropEnt(player, Prop_Data, "m_hOwnerEntity");
 
     if(Trikz_FindPartner(owner) == -1)
         owner = 0;
-
+        
     if(!(0 <= owner <= MaxClients))
-    {
         return Plugin_Continue;
-    }
-
-
+        
     if(g_bPlayerSolid[iSolidId][owner])
         return Plugin_Continue;
         
-
     result = false;
     
     return Plugin_Handled;
