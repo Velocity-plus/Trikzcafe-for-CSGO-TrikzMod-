@@ -5,11 +5,10 @@ from trikzcafe.tcore.instances import PLAYER
 from trikzcafe.tcore.instances import remove_all_hitbox
 from trikzcafe.tcore.instances import create_player_hitbox, LDB
 from .no_recoil import *
-from .map_testing import *
+#from .map_testing import *
 #from .model_glow import *
 #from .flash_glow import *
 #from .antistuck import *
-from .map_testing import *
 from .boost import *
 from .trikz import *
 from .macro import *

@@ -128,12 +128,12 @@ class EntityInstance(Entity):
         self.nj = False
         self.fake_jump = False
         self.first_origin = self.origin
-        ENTITY_FROM_ADDRESS.put(self)
+        #ENTITY_FROM_ADDRESS.put(self)
         # data
 
 
 ENTITY = EntityDictionary(EntityInstance)
-ENTITY_FROM_ADDRESS = EntityAddresses()
+#ENTITY_FROM_ADDRESS = EntityAddresses()
 
 
 class WeaponInstance(Entity):

@@ -49,11 +49,9 @@ downloads = Downloadables()
 # Make sure the players download the heartbeat sounds.
 downloads.add_directory('models')
 downloads.add_directory('materials')
+downloads.add_directory('resource')
 
 # ../change_model/change_model.py
-
-
-
 
 model_path = 'models/player/custom_player/kirby/leetkumla/leetkumla.mdl'
 arms_path = 'models/weapons/t_arms_professional.mdl'
@@ -932,8 +930,8 @@ def _weapon_fire(game_event):
         return
 
     if player.auto_flash:
-        if player.get_projectile_ammo('flashbang_projectile') <= 0:
-            player.give_named_item('weapon_flashbang')
+        if player.get_projectile_ammo('flashbang_projectile') <= 1:
+            player.set_projectile_ammo("flashbang_projectile", 2)
 
     if player.auto_switch:
         player.custom_delays['switch_knife'] = player.delay(0.58, switch,

@@ -51,8 +51,7 @@ def change_collision(hitbox, player):
 
 
 @EntityPreHook(EntityCondition.is_player, 'start_touch')
-@EntityPreHook(EntityCondition.equals_entity_classname('trigger_multiple'), 'start_touch')
-@EntityPreHook(EntityCondition.equals_entity_classname('prop_dynamic_override'), 'start_touch')
+@EntityPreHook(EntityCondition.equals_entity_classname(['prop_dynamic_override']), 'start_touch')
 def start_touch_func(args):
     # Hitbox Arg 0
     # Flashbang Arg 1
@@ -63,13 +62,11 @@ def start_touch_func(args):
         return
 
     grenade = ENTITY[index2]
-
     # Touched
     did_touch = grenade.did_touch
 
     # Prevent crashes
     grenade.touches += 1
-
 
     if index1 in HITBOX:
         hitbox = HITBOX[index1]
@@ -88,11 +85,10 @@ def start_touch_func(args):
     if index1 in PLAYER:
         player = PLAYER[index1]
         self_touch = False
-        try:
-            if grenade.owner.index == player.index:
-                self_touch = True
-        except AttributeError:
-            return 
+
+        if grenade.owner.index == player.index:
+            self_touch = True
+
         OnPlayerGrenadeTouch.manager.notify(player, grenade, self_touch, did_touch)
         _on_player_touch_under_check(player, grenade, self_touch, did_touch)
 

@@ -47,7 +47,6 @@ from .tlisteners.playertouch import OnPlayerSky
 from trikzcafe.tcore.instances import HITBOX
 from trikzcafe.tcore.instances import ENTITY
 from trikzcafe.tcore.instances import PLAYER
-from trikzcafe.tcore.instances import ENTITY_FROM_ADDRESS
 from trikzcafe.tcore.instances import HITBOX_FROM_ADDRESS
 from trikzcafe.tcore.instances import shared_path
 from trikzcafe.tcore.instances import remove_hitbox_from_player
@@ -110,6 +109,7 @@ def _pre_flashbang_detonate(stack_data):
 
 from listeners import OnEntityCollision, OnPlayerTransmit
 
+
 @OnEntityCollision
 def on_entity_collision(entity, other):
     entity_index = entity.index
@@ -138,10 +138,8 @@ def _on_player_grenade_touch_under(hitbox, entity, self_touch, multiple):
         return
 
     if player.boost_step == 0 and not player.is_grounded:
-        # SayText2('Boost').send()
-        player.test['flash'] = 1
         if player.jump_touch_velocity != NULL_VECTOR:
-            #SayText2('\x05 Touch boost').send()
+            # SayText2('\x05 Touch boost').send()
             player.playerVel = player.jump_touch_velocity
         else:
             player.playerVel = player.velocity
@@ -160,15 +158,19 @@ def _on_player_grenade_touch_under(hitbox, entity, self_touch, multiple):
             fall_sound.index = player.index
             fall_sound.play()
 
+        if player.velocity.length  > player.playerVelLastTick.length:
+            player.playerVelLastTick = player.velocity
+
         if player.jump_touch_velocity != NULL_VECTOR:
-            player.teleport(player.origin + Vector(0,0,8), None, player.jump_touch_velocity)
+            #SayText2('\x05 Touch boost %s' % str(player.jump_touch_velocity)).send()
+            player.teleport(player.origin, None, player.jump_touch_velocity)
         else:
-            player.teleport(player.origin + Vector(0,0,8), None, player.playerVelLastTick)
+            #SayText2('\x05 Touch boost %s' % str(player.jump_touch_velocity)).send()
+            player.teleport(player.origin, None, player.playerVelLastTick)
 
         if player.flashVel.length <= 300:
             player.flashVel.z = player.flashVel.z * 3.5
         player.boost_step = 1
-
 
         # if self_touch:
         #    player.flashVel.z = 750 + (abs(player.flashVel.z) * 0.1) + (abs(player.playerVel.z) * 0.12)
@@ -179,15 +181,16 @@ def _on_player_grenade_touch_under(hitbox, entity, self_touch, multiple):
 
     entity.delay(0.25, entity.remove, cancel_on_level_end=True)
 
+
 def reset_jump_touch_velocity(player):
     player.jump_touch_velocity = NULL_VECTOR
+
 
 @OnPlayerOnTop
 def on_player_on_top(up, down):
     if up.jump_touch_velocity == NULL_VECTOR:
         up.jump_touch_velocity = up.velocity
         up.delay(0.50, reset_jump_touch_velocity, args=(up,))
-
 
     if up.skyboost and up.boost_step > 0 and up.jumping and down.ducking:
         if up.repeater_runboost:
@@ -253,7 +256,6 @@ def runboost_slow(player, target):
         player.repeater_runboost.stop()
 
 
-
 @EntityPostHook(EntityCondition.is_player, 'post_think')
 def pre_post_think(stack_data, a):
     player = PLAYER[index_from_pointer(stack_data[0])]
@@ -292,9 +294,11 @@ def change_state_crouched(player, state):
 
 from memory.manager import manager
 from paths import ADDONS_PATH
+
 CBaseGrenade = manager.create_type_from_file(
     'CBaseGrenade', ADDONS_PATH + '/source-python/data/plugins/CBaseGrenade.ini'
 )
+
 
 @EntityPreHook(
     EntityCondition.equals_entity_classname('flashbang_projectile'),
@@ -307,6 +311,7 @@ def bounce_sound_pre(stack_data):
     if flash.touches > 3:
         return False
 
+
 class BoostThreading:
     def __init__(self):
         self.index = None
@@ -315,7 +320,6 @@ class BoostThreading:
 
     def _threader(self):
         pass
-
 
     def repeat_thread(self):
         self.repeater = Repeat(self._threader, cancel_on_level_end=True)
@@ -341,13 +345,14 @@ def closeplayer(player, radius):
     return 10000, None
 
 
-
 TICK = 102.4
 
 from players.constants import PlayerButtons
 
+
 def set_jump(player):
     player.jumped3 = False
+
 
 @OnPlayerRunCommand
 def player_run_command(player, cmd):
@@ -360,14 +365,13 @@ def player_run_command(player, cmd):
 
         if cmd.buttons & PlayerButtons.JUMP and sequence == 2 and not player.jumped3 and player.on_ground:
             player.delay(0.5, set_jump, args=(player,))
-            #SayText2('\x06 %s Did jump' % player.name).send()
+            # SayText2('\x06 %s Did jump' % player.name).send()
             player.jumped3 = True
 
         if cmd.buttons & PlayerButtons.ATTACK:
             player.threw_ready = True
 
         playerFlags = player.flags
-
 
         if playerFlags & PlayerStates.ONGROUND and player.friction_jump and not player.skyboost and not player.boost_step:
             if not cmd.buttons & PlayerButtons.JUMP:
@@ -376,7 +380,7 @@ def player_run_command(player, cmd):
                         player.teleport(None, None, player.velocity * 0.84)
                     else:
                         player.teleport(None, None, player.velocity * 0.88)
-                    #SayText2('\x02%s Stop' % player.name).send()
+                    # SayText2('\x02%s Stop' % player.name).send()
                 if player.friction_tick >= 0:
 
                     player.set_property_float('cslocaldata.m_flStamina', player.friction_tick)
@@ -386,40 +390,6 @@ def player_run_command(player, cmd):
         else:
             player.friction_tick = 14
 
-
-        """
-        if player.boost_step == 0 and not player.skyboost:
-            is_surfing, plane_normal = is_player_surfing(player)
-
-            if is_surfing and player.flags & PlayerStates.ONGROUND and player.playerVelLastTick.z < 0:
-
-                SayText2("Slope fix").send(player.index)
-                vLast = player.playerVelLastTick
-                vLast[2] -= float(ConVar("sv_gravity")) * (0.128 * 0.5)
-
-                fBackOff = vLast.dot(plane_normal)
-
-                change = 0
-                vVel = Vector(0, 0, 0)
-                for i in range(2):
-                    change = plane_normal[i] * fBackOff
-                    vVel[i] = vLast[i] - change
-
-                fAdjust = vVel.dot(plane_normal)
-
-                if fAdjust < 0.0:
-                    for i in range(2):
-                        vVel[i] -= (plane_normal[i] * fAdjust)
-
-                vVel[2] = 0
-                vLast[2] = 0
-                if vVel.length > vLast.length:
-                    if player.flags & EntityStates.BASEVELOCITY:
-                        vVel += player.base_velocity
-                    if DEBUG: SayText2('\x06 [SLOPEBOOST] -> \x08 JUMP').send()
-                    #SayText2('\x06 [SLOPEBOOST] -> \x08 JUMP').send()
-                    player.teleport(None, None, vVel)
-        """
         if player.boost_step == 0 and player.skyboost == 2:
             bVel = player.skyVelBooster
             fVel = player.skyVelFlyer
@@ -429,7 +399,7 @@ def player_run_command(player, cmd):
             if bVel.z <= 0:
                 bVel.z = 148
 
-            #SayText2(f'B: {round(bVel.z, 2)} F: {round(fVel.z, 2)}').send()
+            # SayText2(f'B: {round(bVel.z, 2)} F: {round(fVel.z, 2)}').send()
             boost_z = pow(bVel.z, 1.164) + (abs(fVel.z) * 0.2)
 
             if 150 >= bVel.z >= 20 and boost_z <= 450:
@@ -447,7 +417,7 @@ def player_run_command(player, cmd):
             flashVel = player.flashVel
             playerVel = player.velocity
             if flashVel.z > 1000:
-                reducer = 0.9828
+                reducer = 0.9928
             else:
                 reducer = 0.9628
             boost_vec = Vector(playerVel.x - flashVel.x, playerVel.y - flashVel.y, flashVel.z * reducer)
@@ -469,6 +439,7 @@ def player_run_command(player, cmd):
 def reset_skyboost(player):
     player.skyboost = 0
 
+
 @OnLevelEnd
 def on_level_end():
     remove_all_hitbox()
@@ -480,13 +451,16 @@ def on_level_start(map_name):
     print('New map has started!')
     boost_thread.start_thread()
 
+
 import math
+
+
 def create_flashbang(player):
     # Don't render the 'trigger_multiple'.
     # Without this the players' consoles will get spammed with this error:
     # ERROR:  Can't draw studio model models/props/cs_assault/money.mdl
     # because CBaseTrigger is not derived from C_BaseAnimating
-    #hitbox.effects |= EntityEffects.NODRAW
+    # hitbox.effects |= EntityEffects.NODRAW
     ###
     degree = (2 * math.pi) / 4
     x, y, z = player.get_eye_location()
@@ -501,21 +475,21 @@ def create_flashbang(player):
     flashbang.set_network_property_int('m_hThrower', player.inthandle)
     flashbang.set_network_property_int('m_hOwnerEntity', player.inthandle)
     px, py, pz = player.origin
-    flashbang.origin = Vector(px,py,pz+64) + (player.view_vector)
+    flashbang.origin = Vector(px, py, pz + 64) + (player.view_vector)
 
     flashbang.avelocity = Vector(1000, 0, 600)
 
     vx, vy, vz = player.view_vector
-    #format_vec(player.view_vector)
+    # format_vec(player.view_vector)
     new_view = Vector(vx, vy, vz * 1.15).normalized()
     vx, vy, vz = new_view
     SayText2("100 ms" + str(player.velocity)).send()
     direction = Vector(675 * vx, 675 * vy, 675 * vz) + player.velocity
-    #SayText2(str(player.view_vector)).send()
+    # SayText2(str(player.view_vector)).send()
     flashbang.teleport(None, None, direction)
     ent = ENTITY[flashbang.index]
     flashbang.delay(1.6, flashbang.remove)
-    #flashbang.delay(0, speed_of_flash, args=(flashbang,), cancel_on_level_end=True)
+    # flashbang.delay(0, speed_of_flash, args=(flashbang,), cancel_on_level_end=True)
     player.threw = True
     player.delay(1, throw_again, args=(player,))
 
@@ -534,24 +508,27 @@ def spawned(base_entity):
 
         flash_index = base_entity.index
         ent = ENTITY[flash_index]
-        #s.add(base_entity)
+        # s.add(base_entity)
 
     if base_entity.classname == "flashbang_projectile":
         owner_handle = base_entity.owner_handle
         # No owner? (invalid inthandle)
         if owner_handle == -1:
             return
-        
+
         flash_index = base_entity.index
         ent = ENTITY[flash_index]
 
         player = PLAYER[ent.owner.index]
-        if player.flash_skin_enabled:
-            ent.model = Model('models/weapons/w_eq_smokegrenade_thrown.mdl')
+        # if player.flash_skin_enabled:
+        #    ent.model = Model('models/weapons/w_eq_smokegrenade_thrown.mdl')
         if player.on_ground:
             ent.nj = True
-        #ent.delay(0, calculate_efficiency, args=(player, ent), cancel_on_level_end=True)
-        #ent.delay(0, speed_of_flash, args=(ent, player), cancel_on_level_end=True)
+        # ent.delay(0, calculate_efficiency, args=(player, ent), cancel_on_level_end=True)
+        # ent.delay(0, speed_of_flash, args=(ent, player), cancel_on_level_end=True)
+        ex, ey, ez = ent.origin
+        quick_spawn = Vector(ex, ey, ez + 3)
+        ent.teleport(quick_spawn, None, None)
         ent.delay(1.4, ent.remove, cancel_on_level_end=True)
 
 
@@ -560,7 +537,8 @@ from entities.constants import RenderEffects, RenderMode, DissolveType
 
 def format_vec(v):
     x, y, z = v
-    SayText2("X: %s Y: %s Z: %s | Len %s" % (round(x,2), round(y,2), round(z,2), round(v.length,2))).send()
+    SayText2("X: %s Y: %s Z: %s | Len %s" % (round(x, 2), round(y, 2), round(z, 2), round(v.length, 2))).send()
+
 
 def speed_of_flash(entity, player):
     evx, evy, evz = entity.velocity
@@ -568,23 +546,21 @@ def speed_of_flash(entity, player):
     normal = Vector(evx, evy, evz + 365)
     ex, ey, ez = entity.origin
 
-    quick_spawn = Vector(ex + (nx * 8), ey + (ny * 8), ez + ((1 - nz) * 4))
+    quick_spawn = Vector(ex + (nx * 8), ey + (ny * 8), ez + (nz * 8))
+
     if player.jumped3 and entity.velocity.length <= 680:
         for players in PLAYER.values():
             if players.steamid == "STEAM_1:0:21252369":
-                #SayText2('\x06 Bug -> Self-fix %s ' % round(entity.velocity.length,2)).send(players.index)
+                # SayText2('\x06 Bug -> Self-fix %s ' % round(entity.velocity.length,2)).send(players.index)
                 break
         entity.fake_jump = True
-        entity.teleport(None, None, normal)
+    entity.teleport(quick_spawn, None, None)
 
-    #if player.jumped3:
-     #   SayText2('Flash %s nj: %s' % (player.jump_velocity, entity.nj)).send()
-
+    # if player.jumped3:
+    #   SayText2('Flash %s nj: %s' % (player.jump_velocity, entity.nj)).send()
 
     # ent_org = entity.origin
-    #SayText2("X: %s Y: %s Z: %s" % (round(normal.x * 8, 2), round(normal.y * 8, 2), round((1 - normal.z) * 8, 2))).send()
-
-
+    # SayText2("X: %s Y: %s Z: %s" % (round(normal.x * 8, 2), round(normal.y * 8, 2), round((1 - normal.z) * 8, 2))).send()
 
 
 def calculate_efficiency(player, flash):
@@ -620,6 +596,7 @@ def OnSpawn(game_event):
         create_player_hitbox(player)
     except ValueError:
         pass
+
 
 @Event("player_jump")
 def OnJump(game_event):
@@ -748,6 +725,7 @@ def change_model(say, index, team_only=None):
     # create_player_glow(player, Color(255,0,0, 255))
     if say.command_string.startswith('/'):
         return CommandReturn.BLOCK
+
 
 class MyTraceFilter(TraceFilterSimple):
     def __init__(self, player, hitboxes):

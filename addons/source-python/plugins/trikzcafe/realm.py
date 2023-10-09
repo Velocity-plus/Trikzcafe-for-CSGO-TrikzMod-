@@ -54,6 +54,7 @@ tracked_triggers = ('func_button', 'trigger_multiple')
 # Hide flashes
 @OnEntityTransmit
 def on_transmit_player_entity(player, entity):
+    SayText2("Is this runnign").send()
     entity_index = entity.index
 
     player_index = player.index
@@ -74,6 +75,7 @@ def on_transmit_player_entity(player, entity):
 # Hide players
 @OnPlayerTransmit
 def on_transmit_player_other(player, other):
+    SayText2("Is this runnign").send()
     player_index = player.index
     if player_index not in PLAYER:
         return
@@ -88,6 +90,7 @@ def on_transmit_player_other(player, other):
 # Ignore flash ignore hitboxes
 @OnEntityCollision
 def on_entity_collision(entity, other):
+    SayText2("Is this runnign").send()
     entity_index = entity.index
     if entity_index not in ENTITY:
         return
@@ -116,6 +119,7 @@ def on_entity_collision(entity, other):
 
 @OnPlayerCollision
 def on_entity_collision(player, other):
+    SayText2("Is this runnign").send()
     player_index = player.index
     other_index = other.index
     if player_index not in PLAYER:
@@ -140,6 +144,7 @@ def on_entity_collision(player, other):
 # For realm
 @CollisionHook
 def on_collision_hook(entity, other, trace, mask):
+    SayText2("Is this runnign").send()
     entity_index = entity.index
 
     if entity_index not in PLAYER:
@@ -163,6 +168,7 @@ DEBUG = 0
 
 @OnNetworkedEntityCreated
 def on_entity_created(ent):
+    SayText2("Is this runnign").send()
     if ent.classname.endswith('projectile'):
         entity = Entity(ent.index)
         owner = entity.owner
@@ -244,6 +250,7 @@ Entity_Outputs = ("trigger_multiple", 'func_button', 'func_wall_toggle', 'trigge
 
 @OnEntityOutput
 def on_entity_output(output, activator, caller, value, delay):
+    SayText2("Is this runnign").send()
     # Don't go further if the entity output isn't OnStartTouch.
     if caller.classname not in Entity_Outputs:
         return
@@ -309,6 +316,7 @@ FL_EDICT_ALWAYS = 1 << 3
 
 @OnNetworkedEntitySpawned
 def on_spawned(base_entity):
+    SayText2("Is this runnign").send()
     if base_entity.classname in ['func_wall_toggle']:
         entity = ENTITY_REALM[base_entity.index]
         entity.default_is_hidden = bool(entity.spawn_flags)
