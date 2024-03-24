@@ -46,7 +46,7 @@ We welcome contributions from the community! Whether you're interested in adding
 
 ## Support
 
-For support, questions, or more information, please visit our [community forums] or join our [Discord server].
+For support, questions, or more information, please join our [[Discord server]](https://discord.gg/AJj9xjCfhy).
 
 ## License
 
